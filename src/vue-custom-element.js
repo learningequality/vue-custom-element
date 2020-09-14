@@ -75,7 +75,9 @@ function install(Vue) {
 
       observedAttributes: props.hyphenate,
 
-      shadow: !!options.shadow && !!HTMLElement.prototype.attachShadow
+      shadow: !!options.shadow && !!HTMLElement.prototype.attachShadow,
+
+      extends: options.extends
     });
 
     return CustomElement;

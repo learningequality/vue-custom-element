@@ -33,13 +33,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-function _CustomElement() {
-  return Reflect.construct(HTMLElement, [], this.__proto__.constructor);
-}
-
-
-Object.setPrototypeOf(_CustomElement.prototype, HTMLElement.prototype);
-Object.setPrototypeOf(_CustomElement, HTMLElement);
 function registerCustomElement(tag) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
@@ -67,12 +60,19 @@ function registerCustomElement(tag) {
 
   function define(tagName, CustomElement) {
     var existingCustomElement = customElements.get(tagName);
-    return typeof existingCustomElement !== 'undefined' ? existingCustomElement : customElements.define(tagName, CustomElement);
+    var extendsOptions = typeof options.extends === 'string' ? { extends: options.extends } : null;
+    return typeof existingCustomElement !== 'undefined' ? existingCustomElement : customElements.define(tagName, CustomElement, extendsOptions);
   }
 
   if (isES2015$1) {
-    var CustomElement = function (_CustomElement2) {
-      _inherits(CustomElement, _CustomElement2);
+    var HTMLElementConstructor = HTMLElement;
+    if (typeof options.extends === 'string') {
+      var testElement = document.createElement(options.extends);
+      HTMLElementConstructor = testElement.constructor || HTMLElementConstructor;
+    }
+
+    var CustomElement = function (_HTMLElementConstruct) {
+      _inherits(CustomElement, _HTMLElementConstruct);
 
       function CustomElement(self) {
         var _ret;
@@ -95,7 +95,7 @@ function registerCustomElement(tag) {
       }]);
 
       return CustomElement;
-    }(_CustomElement);
+    }(HTMLElementConstructor);
 
     CustomElement.prototype.connectedCallback = connectedCallback;
     CustomElement.prototype.disconnectedCallback = disconnectedCallback;
@@ -104,29 +104,29 @@ function registerCustomElement(tag) {
     define(tag, CustomElement);
     return CustomElement;
   } else {
-    var _CustomElement3 = function _CustomElement3(self) {
+    var _CustomElement = function _CustomElement(self) {
       var me = self ? HTMLElement.call(self) : this;
 
       constructorCallback.call(me);
       return me;
     };
 
-    _CustomElement3.observedAttributes = options.observedAttributes || [];
+    _CustomElement.observedAttributes = options.observedAttributes || [];
 
-    _CustomElement3.prototype = Object.create(HTMLElement.prototype, {
+    _CustomElement.prototype = Object.create(HTMLElement.prototype, {
       constructor: {
         configurable: true,
         writable: true,
-        value: _CustomElement3
+        value: _CustomElement
       }
     });
 
-    _CustomElement3.prototype.connectedCallback = connectedCallback;
-    _CustomElement3.prototype.disconnectedCallback = disconnectedCallback;
-    _CustomElement3.prototype.attributeChangedCallback = attributeChangedCallback;
+    _CustomElement.prototype.connectedCallback = connectedCallback;
+    _CustomElement.prototype.disconnectedCallback = disconnectedCallback;
+    _CustomElement.prototype.attributeChangedCallback = attributeChangedCallback;
 
-    define(tag, _CustomElement3);
-    return _CustomElement3;
+    define(tag, _CustomElement);
+    return _CustomElement;
   }
 }
 
@@ -531,7 +531,9 @@ function install(Vue) {
 
       observedAttributes: props.hyphenate,
 
-      shadow: !!options.shadow && !!HTMLElement.prototype.attachShadow
+      shadow: !!options.shadow && !!HTMLElement.prototype.attachShadow,
+
+      extends: options.extends
     });
 
     return CustomElement;

@@ -24,13 +24,20 @@ export default function registerCustomElement(tag, options = {}) {
 
   function define(tagName, CustomElement) {
     const existingCustomElement = customElements.get(tagName);
-    return typeof existingCustomElement !== 'undefined' ? existingCustomElement : customElements.define(tagName, CustomElement);
+    const extendsOptions = typeof options.extends === 'string' ? { extends: options.extends } : null;
+    return typeof existingCustomElement !== 'undefined' ? existingCustomElement : customElements.define(tagName, CustomElement, extendsOptions);
   }
 
   if (isES2015) {
     // ES2015 detected. We will use "class" based Custom Elements V1 specification.
     // If it's natively supported it will run without polyfill
-    class CustomElement extends HTMLElement {
+    let HTMLElementConstructor = HTMLElement;
+    if (typeof options.extends === 'string') {
+      const testElement = document.createElement(options.extends);
+      HTMLElementConstructor = testElement.constructor || HTMLElementConstructor;
+    }
+
+    class CustomElement extends HTMLElementConstructor {
       // Can define constructor arguments if you wish.
       constructor(self) {
         super();
