@@ -102,7 +102,8 @@ export function reactiveProps(element, props) {
           const type = props.types[props.camelCase[index]];
           this.setAttribute(props.hyphenate[index], convertAttributeValue(value, type));
         }
-      }
+      },
+      configurable: true
     });
   });
 }

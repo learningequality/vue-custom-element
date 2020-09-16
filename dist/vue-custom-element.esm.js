@@ -339,7 +339,8 @@ function reactiveProps(element, props) {
           var type = props.types[props.camelCase[index]];
           this.setAttribute(props.hyphenate[index], convertAttributeValue(value, type));
         }
-      }
+      },
+      configurable: true
     });
   });
 }
