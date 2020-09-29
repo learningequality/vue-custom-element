@@ -335,7 +335,7 @@ function reactiveProps(element, props) {
   props.camelCase.forEach(function (name, index) {
     Object.defineProperty(element, name, {
       get: function get() {
-        return this.__vue_custom_element__[name];
+        return this.__vue_custom_element__ && this.__vue_custom_element__[name];
       },
       set: function set(value) {
         if ((_typeof(value) === 'object' || typeof value === 'function') && this.__vue_custom_element__) {
